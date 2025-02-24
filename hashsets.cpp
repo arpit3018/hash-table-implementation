@@ -23,13 +23,19 @@ uint64_t get_murmur_hashcode(void* ptr){
 }
 
 struct HashSet {
-    static const int SIZE = 1024;
-    public:
-        Node* items[SIZE];
+    int size;
+    int occupiedSlots;
+    Node** items;
+
+    HashSet() {
+        size = 1024;
+        occupiedSlots = 0;
+        items = new Node*[size];
+    }
 
     bool insert(void* ptr) {
         int hashValue = get_murmur_hashcode(ptr);
-        int index = hashValue % SIZE;
+        int index = hashValue & (size-1);
     
         if(items[index] == nullptr) {
             Node* newKey = new Node(ptr,hashValue,nullptr);
@@ -48,12 +54,14 @@ struct HashSet {
             newKey->next = items[index];
             items[index] = newKey; 
         }
+        occupiedSlots++;
+        if(isEligibleForRehashForInsert()) rehash(2*size);
         return true;
     }
 
     bool lookup(void* ptr) {
         int hashValue = get_murmur_hashcode(ptr);
-        int index = hashValue % SIZE;
+        int index = hashValue & (size-1);
         Node* head = items[index];
         while(head != nullptr) {
             if(head->getKey() == ptr) {
@@ -66,7 +74,7 @@ struct HashSet {
 
     bool remove(void* ptr) {
         int hashValue = get_murmur_hashcode(ptr);
-        int index = hashValue % SIZE;
+        int index = hashValue & (size-1);
         Node* head = items[index];
         Node* prev = nullptr;
         while(head != nullptr) {
@@ -78,12 +86,39 @@ struct HashSet {
                 }                
                 delete head;
                 head = nullptr;
+                occupiedSlots--;
+                if(isEligibleForRehashForRemove()) rehash(size/2);
                 return true;
             }
             prev = head;
             head = head->next;
         }
         return false;
+    }
+
+    bool isEligibleForRehashForInsert() {      
+        float loadFactor = (float)occupiedSlots / size;
+        if(loadFactor > 0.5) return true;
+        return false;        
+    }
+
+    bool isEligibleForRehashForRemove() {      
+        float loadFactor = (float)occupiedSlots / size;
+        if(loadFactor < 0.125) return true;
+        return false;        
+    }
+
+    void rehash(int newLen) {
+        Node** newItems = new Node*[newLen];
+        for(int it=0;it<size;it++) {
+            if(items[it] == nullptr) continue;
+            int hash = items[it]->getHashValue();
+            int newIndex = hash & (newLen-1);
+            newItems[newIndex] = items[it];
+        }           
+        delete items;
+        items = newItems;
+        size = newLen;
     }
     
 };
