@@ -1,19 +1,7 @@
 #include <string>
+#include "hashset.h"
 #include <iostream>
 #include "murmurhash/MurmurHash3.h"
-
-struct Node {
-    void* key;
-    int hash_value;
-    struct Node * next;
-    public:
-        Node(){}
-        Node(void* ptr, int hv, Node* next) : key(ptr), hash_value(hv), next(next) {}
-        void* getKey() {return key;}
-        int getHashValue() {return hash_value;}
-        Node* getNext() {return next;}
-};
-
 
 uint64_t get_murmur_hashcode(void* ptr){
     uint64_t hash_output;
@@ -22,18 +10,15 @@ uint64_t get_murmur_hashcode(void* ptr){
     return hash_output;
 }
 
-struct HashSet {
-    int size;
-    int occupiedSlots;
-    Node** items;
 
-    HashSet() {
+
+    HashSet::HashSet() {
         size = 1024;
         occupiedSlots = 0;
         items = new Node*[size];
     }
 
-    bool insert(void* ptr) {
+    bool HashSet::insert(void* ptr) {
         int hashValue = get_murmur_hashcode(ptr);
         int index = hashValue & (size-1);
     
@@ -59,7 +44,7 @@ struct HashSet {
         return true;
     }
 
-    bool lookup(void* ptr) {
+    bool HashSet::lookup(void* ptr) {
         int hashValue = get_murmur_hashcode(ptr);
         int index = hashValue & (size-1);
         Node* head = items[index];
@@ -72,7 +57,7 @@ struct HashSet {
         return false;
     }
 
-    bool remove(void* ptr) {
+    bool HashSet::remove(void* ptr) {
         int hashValue = get_murmur_hashcode(ptr);
         int index = hashValue & (size-1);
         Node* head = items[index];
@@ -96,19 +81,19 @@ struct HashSet {
         return false;
     }
 
-    bool isEligibleForRehashForInsert() {      
+    bool HashSet::isEligibleForRehashForInsert() {      
         float loadFactor = (float)occupiedSlots / size;
         if(loadFactor > 0.5) return true;
         return false;        
     }
 
-    bool isEligibleForRehashForRemove() {      
+    bool HashSet::isEligibleForRehashForRemove() {      
         float loadFactor = (float)occupiedSlots / size;
         if(loadFactor < 0.125) return true;
         return false;        
     }
 
-    void rehash(int newLen) {
+    void HashSet::rehash(int newLen) {
         Node** newItems = new Node*[newLen];
         for(int it=0;it<size;it++) {
             if(items[it] == nullptr) continue;
@@ -121,7 +106,7 @@ struct HashSet {
         size = newLen;
     }
     
-};
+
 
 int main() {
     HashSet* hashset = new HashSet();
