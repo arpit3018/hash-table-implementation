@@ -11,8 +11,9 @@ uint64_t get_murmur_hashcode(void *ptr)
     return hash_output;
 }
 
-size_t modular_hash(void* key, size_t num_buckets) {
-    return std::hash<void*>{}(key) % num_buckets;
+size_t modular_hash(void *key, size_t num_buckets)
+{
+    return std::hash<void *>{}(key) % num_buckets;
 }
 
 HashSet::HashSet()
@@ -122,12 +123,13 @@ bool HashSet::isEligibleForRehashForRemove()
 
 void HashSet::rehash(size_t newLen)
 {
-    Node **newItems = new Node* [newLen]();
+    Node **newItems = new Node *[newLen]();
     for (int it = 0; it < size; it++)
     {
-        Node* head = items[it];
-        while(head) {
-            Node* next = head->next;
+        Node *head = items[it];
+        while (head)
+        {
+            Node *next = head->next;
             size_t newIndex = head->getHashValue() & (newLen - 1);
             head->next = newItems[newIndex];
             newItems[newIndex] = head;

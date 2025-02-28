@@ -4,32 +4,34 @@
 #include <string>
 #include "murmurhash/MurmurHash3.h"
 
-struct Node {
-    void* key;
+struct Node
+{
+    void *key;
     size_t hash_value;
-    Node* next;
+    Node *next;
 
     Node() : key(nullptr), hash_value(0), next(nullptr) {}
-    Node(void* ptr, int hv, Node* next) : key(ptr), hash_value(hv), next(next) {}
+    Node(void *ptr, int hv, Node *next) : key(ptr), hash_value(hv), next(next) {}
 
-    void* getKey() { return key; }
+    void *getKey() { return key; }
     size_t getHashValue() { return hash_value; }
-    Node* getNext() { return next; }
+    Node *getNext() { return next; }
 };
 
-uint64_t get_murmur_hashcode(void* ptr);
+uint64_t get_murmur_hashcode(void *ptr);
 
-struct HashSet {
+struct HashSet
+{
     size_t size;
     size_t occupiedSlots;
-    Node** items;
+    Node **items;
 
     HashSet();
     // ~HashSet();
-    
-    bool insert(void* ptr);
-    bool lookup(void* ptr);
-    bool remove(void* ptr);
+
+    bool insert(void *ptr);
+    bool lookup(void *ptr);
+    bool remove(void *ptr);
 
 private:
     bool isEligibleForRehashForInsert();
