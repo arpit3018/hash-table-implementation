@@ -18,16 +18,16 @@ size_t modular_hash(void *key, size_t num_buckets)
 
 HashSet::HashSet()
 {
-    size = 4096;
+    size = 4093;
     occupiedSlots = 0;
     items = new Node *[size]();
+    inv_prime_size = 1.0 / size;
 }
 
 bool HashSet::insert(void *ptr)
 {
     size_t hashValue = get_murmur_hashcode(ptr);
-    // size_t hashValue = modular_hash(ptr,size);
-    size_t index = hashValue & (size - 1);
+    size_t index = hashValue - (size_t)(hashValue * inv_prime_size) * size;
 
     if (items[index] == nullptr)
     {
@@ -60,8 +60,7 @@ bool HashSet::insert(void *ptr)
 bool HashSet::lookup(void *ptr)
 {
     size_t hashValue = get_murmur_hashcode(ptr);
-    // size_t hashValue = modular_hash(ptr,size);
-    size_t index = hashValue & (size - 1);
+    size_t index = hashValue - (size_t)(hashValue * inv_prime_size) * size;
     Node *head = items[index];
     while (head != nullptr)
     {
@@ -81,7 +80,7 @@ bool HashSet::remove(void *ptr)
         rehash(size / 2);
     size_t hashValue = get_murmur_hashcode(ptr);
     // size_t hashValue = modular_hash(ptr,size);
-    size_t index = hashValue & (size - 1);
+    size_t index = hashValue - (size_t)(hashValue * inv_prime_size) * size;
     Node *head = items[index];
     Node *prev = nullptr;
     while (head != nullptr)
@@ -130,7 +129,7 @@ void HashSet::rehash(size_t newLen)
         while (head)
         {
             Node *next = head->next;
-            size_t newIndex = head->getHashValue() & (newLen - 1);
+            size_t newIndex = head->getHashValue() -(size_t)(head->getHashValue() * inv_prime_size) * size;
             head->next = newItems[newIndex];
             newItems[newIndex] = head;
             head = next;
@@ -139,4 +138,5 @@ void HashSet::rehash(size_t newLen)
     delete[] items;
     items = newItems;
     size = newLen;
+    inv_prime_size = 1.0 / size;
 }

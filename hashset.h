@@ -23,6 +23,7 @@ uint64_t get_murmur_hashcode(void *ptr);
 struct HashSet
 {
     size_t size;
+    double inv_prime_size;
     size_t occupiedSlots;
     Node **items;
 
