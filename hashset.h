@@ -12,6 +12,7 @@ struct Node
 
     Node() : key(nullptr), hash_value(0), next(nullptr) {}
     Node(void *ptr, int hv, Node *next) : key(ptr), hash_value(hv), next(next) {}
+    Node(void *ptr, int hv) : key(ptr), hash_value(hv), next(nullptr) {}
 
     void *getKey() { return key; }
     size_t getHashValue() { return hash_value; }
@@ -19,16 +20,16 @@ struct Node
 };
 
 uint64_t get_murmur_hashcode(void *ptr);
+size_t modular_hash(void *ptr);
 
 struct HashSet
 {
     size_t size;
-    double inv_prime_size;
     size_t occupiedSlots;
     Node **items;
 
     HashSet();
-    // ~HashSet();
+    ~HashSet();
 
     bool insert(void *ptr);
     bool lookup(void *ptr);
